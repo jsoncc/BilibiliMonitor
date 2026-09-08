@@ -1,0 +1,25 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "type": "node-terminal",
+      "request": "launch",
+      "name": "BilibiliMonitor: 后端",
+      "command": "C:\\Users\\JsonCC\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\python\\python.exe -m uvicorn app.main:app --reload --port 8000",
+      "cwd": "${workspaceFolder}\\backend"
+    },
+    {
+      "type": "node-terminal",
+      "request": "launch",
+      "name": "BilibiliMonitor: 前端",
+      "command": "C:\\Users\\JsonCC\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\bin\\fallback\\pnpm.cmd run dev",
+      "cwd": "${workspaceFolder}\\frontend"
+    }
+  ],
+  "compounds": [
+    {
+      "name": "BilibiliMonitor: 启动全部",
+      "configurations": ["BilibiliMonitor: 后端", "BilibiliMonitor: 前端"]
+    }
+  ]
+}
