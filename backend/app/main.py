@@ -158,8 +158,8 @@ def current_trend(target_id: int, kind: str, hours: int):
 @app.get('/api/videos/{target_id}/current')
 def video_current(target_id: int): return current_trend(target_id, 'video', 24)['latest']
 @app.get('/api/videos/{target_id}/trend')
-def video_trend(target_id: int, hours: int = 24): return current_trend(target_id, 'video', max(1, min(hours, 168)))
+def video_trend(target_id: int, hours: int = 168): return current_trend(target_id, 'video', max(1, min(hours, 720)))
 @app.get('/api/uploaders/{target_id}/current')
 def uploader_current(target_id: int): return current_trend(target_id, 'uploader', 24)['latest']
 @app.get('/api/uploaders/{target_id}/trend')
-def uploader_trend(target_id: int, hours: int = 24): return current_trend(target_id, 'uploader', max(1, min(hours, 168)))
+def uploader_trend(target_id: int, hours: int = 168): return current_trend(target_id, 'uploader', max(1, min(hours, 720)))

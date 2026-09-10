@@ -13,8 +13,8 @@
 - `DELETE /api/targets/{id}`：停止监控但保留历史快照。
 - `POST /api/targets/{id}/collect`：立即采集一次。
 - `PATCH /api/targets/{id}/settings`：修改采集间隔。
-- `GET /api/videos/{id}/trend`：查询视频趋势。
-- `GET /api/uploaders/{id}/trend`：查询 UP 主趋势。
+- `GET /api/videos/{id}/trend`：查询视频趋势，默认 168 小时，最多 720 小时。
+- `GET /api/uploaders/{id}/trend`：查询 UP 主趋势，默认 168 小时，最多 720 小时。
 - `GET /api/health`：检查服务状态。
 
 对象响应包含 `last_success_at`、`last_error_at`、`next_collect_at`、`last_error` 和 `active` 状态字段。
