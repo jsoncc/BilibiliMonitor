@@ -13,6 +13,7 @@
 | [开发指南](development.md) | 本地启动、开发约定和目录说明 |
 | [运维排障](troubleshooting.md) | 数据采集、接口限制和本地故障排查 |
 | [架构决策记录](decisions.md) | 重要技术决策及其原因 |
+| [贡献指南](CONTRIBUTING.md) | BilibiliMonitor Git Commit 标准和贡献约定 |
 
 ## 文档维护规则
 
