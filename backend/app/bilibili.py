@@ -1,8 +1,9 @@
 from __future__ import annotations
 
-import os, re
+import hashlib, os, re, time
 from datetime import datetime, timezone
 from dataclasses import dataclass
+from urllib.parse import urlencode
 import httpx
 
 BASE = 'https://api.bilibili.com'
@@ -55,6 +56,19 @@ class BilibiliClient:
             raise RuntimeError(payload.get('message') or f'哔哩哔哩接口错误: {payload.get("code")}')
         return payload.get('data') or {}
 
+    async def get_wbi(self, path: str, params: dict):
+        nav = await self.get('/x/web-interface/nav', {})
+        wbi_img = nav.get('wbi_img') or {}
+        img_key = (wbi_img.get('img_url') or '').rsplit('/', 1)[-1].split('.')[0]
+        sub_key = (wbi_img.get('sub_url') or '').rsplit('/', 1)[-1].split('.')[0]
+        mixin_table = [46, 29, 55, 15, 47, 18, 2, 35, 40, 7, 58, 1, 48, 27, 49, 28, 38, 17, 10, 22, 43, 30, 21, 6, 31, 45, 20, 5, 8, 25, 0, 23, 12, 24, 9, 53, 34, 14, 56, 41, 19, 3, 32, 50, 11, 44, 37, 54, 16, 39, 4, 42, 26, 36, 13, 52, 57, 33, 51]
+        raw_key = img_key + sub_key
+        mixin_key = ''.join(raw_key[index] for index in mixin_table if index < len(raw_key))[:32]
+        signed = {**params, 'wts': int(time.time())}
+        query = urlencode(sorted(signed.items()))
+        signed['w_rid'] = hashlib.md5((query + mixin_key).encode()).hexdigest()
+        return await self.get(path, signed)
+
     async def resolve(self, target_type: str, key: str) -> Resolved:
         if target_type == 'video':
             data = await self.get('/x/web-interface/view', {'bvid': key} if key.startswith('BV') else {'aid': key})
@@ -82,7 +96,7 @@ class BilibiliClient:
         relation = await self.get('/x/relation/stat', {'vmid': key})
         last_submission_at = ''
         try:
-            archive_data = await self.get('/x/space/arc/search', {'mid': key, 'pn': 1, 'ps': 1, 'order': 'pubdate'})
+            archive_data = await self.get_wbi('/x/space/wbi/arc/search', {'mid': key, 'pn': 1, 'ps': 1, 'order': 'pubdate', 'platform': 'web', 'web_location': '1550101'})
             items = (archive_data.get('list') or {}).get('vlist') or []
             if items and items[0].get('created'):
                 last_submission_at = datetime.fromtimestamp(int(items[0]['created']), tz=timezone.utc).isoformat()

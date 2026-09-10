@@ -48,7 +48,9 @@ async def collect_target(target_id: int, force: bool = False):
                     target = db.get(Target, target_id)
                     if target.target_type == 'video': db.add(VideoSnapshot(target_id=target.id, **stats))
                     else:
-                        target.last_submission_at = stats.pop('last_submission_at', '')
+                        last_submission_at = stats.pop('last_submission_at', '')
+                        if last_submission_at:
+                            target.last_submission_at = last_submission_at
                         db.add(UploaderSnapshot(target_id=target.id, **stats))
                     captured = now(); target.last_collected_at = captured; target.last_success_at = captured
                     target.last_error = ''; target.next_collect_at = captured + timedelta(seconds=target.interval_seconds)
