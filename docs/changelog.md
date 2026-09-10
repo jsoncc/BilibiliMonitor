@@ -2,6 +2,8 @@
 
 ## 2026-09-10
 
+- 删除详情区与左侧监控列表重复的封面、类型和 BV/UID 信息，保留标题、状态和外链操作。
+
 - 将顶部品牌标识从字母 `B` 替换为本地 Bilibili 风格图标。
 
 - 将 `CONTRIBUTING.md` 转换为 BilibiliMonitor 专用 Git Commit 标准。

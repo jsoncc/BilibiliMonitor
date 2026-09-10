@@ -42,3 +42,4 @@
 - 前端生产构建通过：`pnpm run build`。
 - 后端测试通过：`python -m unittest discover -s tests -v`（4 项）。
 - 顶部品牌标识已替换为本地 Bilibili 风格 SVG 图标。
+- 详情区已移除与左侧监控列表重复的对象缩略图、类型和标识信息。
