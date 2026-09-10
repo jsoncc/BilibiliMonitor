@@ -7,6 +7,16 @@ import httpx
 BASE = 'https://api.bilibili.com'
 UA = os.getenv('BILIBILI_USER_AGENT', 'BilibiliMonitor/0.1 (local development)')
 
+def normalize_image_url(value: str | None) -> str:
+    value = (value or '').strip()
+    if not value:
+        return ''
+    if value.startswith('//'):
+        return 'https:' + value
+    if value.startswith('http://'):
+        return 'https://' + value[7:]
+    return value
+
 @dataclass
 class Resolved:
     target_type: str
@@ -48,14 +58,14 @@ class BilibiliClient:
         if target_type == 'video':
             data = await self.get('/x/web-interface/view', {'bvid': key} if key.startswith('BV') else {'aid': key})
             owner = data.get('owner') or {}
-            return Resolved('video', key, data.get('title',''), data.get('desc',''), data.get('pic',''), str(owner.get('mid','')), data)
+            return Resolved('video', key, data.get('title',''), data.get('desc',''), normalize_image_url(data.get('pic')), str(owner.get('mid','')), data)
         try:
             card_data = await self.get('/x/web-interface/card', {'mid': key})
             card = card_data.get('card') or card_data
-            return Resolved('uploader', key, card.get('name',''), card.get('sign',''), card.get('face',''), key, card_data)
+            return Resolved('uploader', key, card.get('name',''), card.get('sign',''), normalize_image_url(card.get('face')), key, card_data)
         except Exception:
             data = await self.get('/x/space/acc/info', {'mid': key})
-            return Resolved('uploader', key, data.get('name',''), data.get('sign',''), data.get('face',''), key, data)
+            return Resolved('uploader', key, data.get('name',''), data.get('sign',''), normalize_image_url(data.get('face')), key, data)
 
     async def video_stats(self, key: str) -> dict:
         data = await self.get('/x/web-interface/view', {'bvid': key} if key.startswith('BV') else {'aid': key})

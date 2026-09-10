@@ -3,14 +3,16 @@ from __future__ import annotations
 import asyncio
 from contextlib import asynccontextmanager
 from datetime import timedelta, timezone
-from fastapi import FastAPI, HTTPException
+from urllib.parse import urlparse
+import httpx
+from fastapi import FastAPI, HTTPException, Query, Response
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel, Field
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
 from sqlalchemy import select
 
 from .db import CollectLog, SessionLocal, Target, UploaderSnapshot, VideoSnapshot, init_db, now, trend_rows
-from .bilibili import BilibiliClient, parse_input
+from .bilibili import BilibiliClient, normalize_image_url, parse_input
 
 client = BilibiliClient()
 scheduler = AsyncIOScheduler()
@@ -78,6 +80,28 @@ app.add_middleware(CORSMiddleware, allow_origins=['http://localhost:5173','http:
 
 @app.get('/api/health')
 def health(): return {'status': 'ok', 'database': 'sqlite', 'collector': scheduler.running}
+
+@app.get('/api/media/image')
+async def media_image(url: str = Query(min_length=1, max_length=2000)):
+    image_url = normalize_image_url(url)
+    parsed = urlparse(image_url)
+    allowed = {'i0.hdslb.com', 'i1.hdslb.com', 'i2.hdslb.com', 'i3.hdslb.com', 'hdslb.com'}
+    if parsed.scheme != 'https' or not parsed.hostname or not (parsed.hostname in allowed or parsed.hostname.endswith('.hdslb.com')):
+        raise HTTPException(400, '只允许代理哔哩哔哩图片地址')
+    try:
+        async with httpx.AsyncClient(timeout=10, headers=client.headers, follow_redirects=True) as http:
+            upstream = await http.get(image_url)
+            upstream.raise_for_status()
+            if len(upstream.content) > 8 * 1024 * 1024:
+                raise HTTPException(413, '图片文件过大')
+            content_type = upstream.headers.get('content-type', 'image/jpeg').split(';', 1)[0]
+            if not content_type.startswith('image/'):
+                raise HTTPException(502, '图片响应格式无效')
+            return Response(content=upstream.content, media_type=content_type, headers={'Cache-Control': 'public, max-age=3600'})
+    except HTTPException:
+        raise
+    except Exception as exc:
+        raise HTTPException(502, f'图片加载失败: {str(exc)[:200]}')
 
 def resolved_dict(r): return {'target_type': r.target_type, 'target_key': r.key, 'title': r.title, 'description': r.description, 'cover_url': r.cover_url, 'owner_uid': r.owner_uid}
 

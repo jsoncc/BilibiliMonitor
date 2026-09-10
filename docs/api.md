@@ -15,6 +15,7 @@
 - `PATCH /api/targets/{id}/settings`：修改采集间隔。
 - `GET /api/videos/{id}/trend?hours=24|168|720`：查询视频趋势，默认 168 小时，最多 720 小时；前端按单指标展示。
 - `GET /api/uploaders/{id}/trend?hours=24|168|720`：查询 UP 主趋势，默认 168 小时，最多 720 小时；前端按单指标展示。
+- `GET /api/media/image?url=...`：受限代理 B 站图片，统一使用 HTTPS、B 站图片域名白名单、10 秒超时和 8MB 大小限制；不允许代理其他域名。
 
 前端趋势范围对应 24 小时、7 天和 30 天。响应包含真实采集时间点；无点或只有一个点时由前端显示原因和等待下一次采集提示。
 - `GET /api/health`：检查服务状态。

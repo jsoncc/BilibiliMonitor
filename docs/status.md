@@ -22,6 +22,7 @@
 - 趋势 24 小时/7 天/30 天范围切换。
 - 趋势单指标、增量/总量和单点状态展示。
 - 页面内搜索、采集和趋势错误提示。
+- 首屏高度、趋势横坐标、B 站图片代理和按钮样式统一修复。
 
 ## 已知待完善
 
@@ -39,4 +40,4 @@
 - 基础输入解析自动化测试已加入 `backend/tests/test_core.py`。
 - 趋势默认查询最近 7 天，历史快照窗口可查询至 30 天。
 - 前端生产构建通过：`pnpm run build`。
-- 后端测试通过：`python -m unittest discover -s tests -v`（3 项）。
+- 后端测试通过：`python -m unittest discover -s tests -v`（4 项）。
