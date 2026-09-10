@@ -41,3 +41,4 @@
 - 趋势默认查询最近 7 天，历史快照窗口可查询至 30 天。
 - 前端生产构建通过：`pnpm run build`。
 - 后端测试通过：`python -m unittest discover -s tests -v`（4 项）。
+- 顶部品牌标识已替换为本地 Bilibili 风格 SVG 图标。

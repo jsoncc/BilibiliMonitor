@@ -2,6 +2,8 @@
 
 ## 2026-09-10
 
+- 将顶部品牌标识从字母 `B` 替换为本地 Bilibili 风格图标。
+
 - 将 `CONTRIBUTING.md` 转换为 BilibiliMonitor 专用 Git Commit 标准。
 - 明确提交类型、英文作用域、中文摘要、测试区块和兼容性说明规则。
 
