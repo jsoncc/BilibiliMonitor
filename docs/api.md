@@ -20,4 +20,4 @@
 前端趋势范围对应 24 小时、7 天和 30 天。响应包含真实采集时间点；无点或只有一个点时由前端显示原因和等待下一次采集提示。
 - `GET /api/health`：检查服务状态。
 
-对象响应包含 `last_success_at`、`last_error_at`、`next_collect_at`、`last_error` 和 `active` 状态字段。
+对象响应包含 `last_success_at`、`last_error_at`、`next_collect_at`、`last_error`、`last_submission_at` 和 `active` 状态字段。`last_submission_at` 仅对 UP 主有值，表示最近一次成功获取到的投稿时间。

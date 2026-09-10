@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import os, re
+from datetime import datetime, timezone
 from dataclasses import dataclass
 import httpx
 
@@ -79,6 +80,14 @@ class BilibiliClient:
 
     async def uploader_stats(self, key: str) -> dict:
         relation = await self.get('/x/relation/stat', {'vmid': key})
+        last_submission_at = ''
+        try:
+            archive_data = await self.get('/x/space/arc/search', {'mid': key, 'pn': 1, 'ps': 1, 'order': 'pubdate'})
+            items = (archive_data.get('list') or {}).get('vlist') or []
+            if items and items[0].get('created'):
+                last_submission_at = datetime.fromtimestamp(int(items[0]['created']), tz=timezone.utc).isoformat()
+        except Exception:
+            pass
         try:
             data = await self.get('/x/web-interface/card', {'mid': key})
             card = data.get('card') or data
@@ -86,4 +95,4 @@ class BilibiliClient:
         except Exception:
             data = await self.get('/x/space/acc/info', {'mid': key})
             video_count = data.get('video', 0)
-        return {'follower_count': relation.get('follower',0), 'following_count': relation.get('following',0), 'video_count': video_count}
+        return {'follower_count': relation.get('follower',0), 'following_count': relation.get('following',0), 'video_count': video_count, 'last_submission_at': last_submission_at}
