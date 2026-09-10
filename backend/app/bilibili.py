@@ -3,10 +3,14 @@ from __future__ import annotations
 import hashlib, os, re, time
 from datetime import datetime, timezone
 from dataclasses import dataclass
+from pathlib import Path
 from urllib.parse import urlencode
 import httpx
+from dotenv import load_dotenv
 
 BASE = 'https://api.bilibili.com'
+PROJECT_ROOT = Path(__file__).resolve().parents[2]
+load_dotenv(PROJECT_ROOT / '.env')
 UA = os.getenv('BILIBILI_USER_AGENT', 'BilibiliMonitor/0.1 (local development)')
 
 def normalize_image_url(value: str | None) -> str:
