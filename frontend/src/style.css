@@ -101,7 +101,14 @@ button { cursor: pointer; }
 .metric-grid { display: grid; grid-template-columns: repeat(7, minmax(100px, 1fr)); gap: 12px; }
 .metric-section-head { display: flex; align-items: baseline; justify-content: space-between; margin: 0 2px 8px; color: var(--muted); font-size: 11px; }
 .metric-section-head strong { color: var(--ink); font-size: 13px; }
-.metric-card { min-width: 0; padding: 12px 14px; background: var(--card); border: 1px solid var(--line); border-radius: 15px; box-shadow: 0 8px 24px rgba(31,52,84,.04); }
+.metric-card { min-width: 0; padding: 12px 14px 11px; background: var(--card); border: 1px solid var(--line); border-radius: 15px; box-shadow: 0 8px 24px rgba(31,52,84,.04); }
+.metric-card .metric-label { display: block; color: var(--muted); font-size: 12px; }
+.metric-card .metric-value { display: block; margin: 7px 0 8px; overflow: hidden; font-size: 19px; line-height: 1.1; text-overflow: ellipsis; white-space: nowrap; }
+.metric-card .metric-growth { display: block; color: var(--green); font-size: 12px; font-style: normal; white-space: nowrap; }
+.metric-card .metric-growth b { font-size: 13px; }
+.metric-card .metric-growth small { display: block; margin-top: 3px; color: var(--muted); font-size: 10px; }
+.metric-card .metric-growth.negative { color: var(--orange); }
+.metric-card .metric-growth.stable { color: var(--muted); }
 .metric-label { color: var(--muted); font-size: 12px; }
 .metric-value { margin: 10px 0 8px; overflow: hidden; font-size: 22px; font-weight: 800; text-overflow: ellipsis; white-space: nowrap; }
 .metric-growth { color: var(--green); font-size: 12px; }

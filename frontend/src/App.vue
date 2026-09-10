@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, onMounted, onUnmounted, ref } from 'vue'
+import { computed, onMounted, onUnmounted, provide, ref } from 'vue'
 import SearchBar from './components/SearchBar.vue'
 import MonitorSidebar from './components/MonitorSidebar.vue'
 import MetricGrid from './components/MetricGrid.vue'
@@ -11,6 +11,7 @@ import type { MetricKey, Target, TrendRange } from './types'
 type ViewState='empty'|'searching'|'preview'|'viewing'|'monitoring'|'history'|'error'
 const query=ref(''),targets=ref<Target[]>([]),history=ref<Target[]>([]),selected=ref<Target|null>(null),preview=ref<any>(null),trend=ref<any>(null),error=ref(''),loading=ref(false),state=ref<ViewState>('empty'),range=ref<TrendRange>(168),mode=ref<'growth'|'total'>('growth'),metric=ref<MetricKey>('view_count'),showSettings=ref(false),interval=ref(60)
 const isVideo=computed(()=>selected.value?.target_type==='video')
+provide('trendRange', range)
 const fallbackMetric=computed<MetricKey>(()=>isVideo.value?'view_count':'follower_count')
 async function api(path:string,options?:RequestInit){const response=await fetch(path,options);const data=await response.json();if(!response.ok)throw Error(data.detail||'请求失败');return data}
 async function load(){[targets.value,history.value]=await Promise.all([api('/api/targets'),api('/api/targets/history')])}
