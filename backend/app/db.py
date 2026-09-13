@@ -4,7 +4,7 @@ from datetime import datetime, timedelta, timezone
 from pathlib import Path
 from typing import Any
 
-from sqlalchemy import Boolean, DateTime, ForeignKey, Integer, String, create_engine, inspect, select, text
+from sqlalchemy import Boolean, DateTime, ForeignKey, Integer, String, create_engine, event, inspect, select, text
 from sqlalchemy.orm import DeclarativeBase, Mapped, Session, mapped_column, sessionmaker
 
 ROOT = Path(__file__).resolve().parents[2]
@@ -14,6 +14,15 @@ if not DB_PATH.is_absolute():
 DB_PATH.parent.mkdir(parents=True, exist_ok=True)
 engine = create_engine(f'sqlite:///{DB_PATH}', connect_args={'check_same_thread': False})
 SessionLocal = sessionmaker(bind=engine, expire_on_commit=False)
+
+@event.listens_for(engine, 'connect')
+def configure_sqlite(connection, _):
+    """Keep local reads/exports responsive while the collector writes snapshots."""
+    cursor = connection.cursor()
+    cursor.execute('PRAGMA journal_mode=WAL')
+    cursor.execute('PRAGMA foreign_keys=ON')
+    cursor.execute('PRAGMA busy_timeout=5000')
+    cursor.close()
 
 def now() -> datetime:
     return datetime.now(timezone.utc)

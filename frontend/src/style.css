@@ -85,6 +85,13 @@ button { cursor: pointer; }
 .history-section .target-card { opacity: .75; }
 .history-section .target-card:hover { opacity: 1; }
 .side-empty { padding: 12px 10px; color: #a4afbf; font-size: 12px; }
+.storage-summary { display: flex; align-items: flex-end; justify-content: space-between; gap: 10px; margin: 24px 2px 2px; padding: 14px 10px 4px; border-top: 1px solid var(--line); }
+.storage-summary > div { min-width: 0; display: grid; gap: 4px; }
+.storage-summary .eyebrow { color: var(--muted); font-size: 10px; }
+.storage-summary strong { font-size: 16px; }
+.storage-summary small { color: var(--muted); font-size: 10px; white-space: nowrap; }
+.storage-summary .storage-error { color: var(--red); }
+.storage-summary .soft-button { min-height: 32px; padding: 6px 10px; white-space: nowrap; }
 .status-dot { display: inline-block; width: 6px; height: 6px; margin-right: 5px; border-radius: 50%; background: var(--green); }
 .status-dot.off { background: #a9b4c3; }
 
@@ -148,6 +155,24 @@ button { cursor: pointer; }
 .settings-modal h3 { margin-top: 0; }
 .settings-modal label { display: block; margin: 18px 0 8px; color: var(--muted); font-size: 13px; }
 .settings-modal input, .settings-modal select { width: 100%; padding: 11px 12px; border: 1px solid var(--line); border-radius: 10px; outline: none; }
+.settings-modal h2 { margin: 8px 0; font-size: 21px; }
+.settings-modal > p { margin: 0; color: var(--muted); font-size: 13px; line-height: 1.65; }
+.form-segmented { width: fit-content; }
+.export-modal { width: min(480px, 100%); }
+.log-modal { width: min(680px, 100%); }
+.log-target { margin-bottom: 14px !important; }
+.health-summary { display: grid; gap: 6px; margin: 18px 0 12px; padding: 12px; color: var(--muted); background: #f6f9fd; border-radius: 12px; font-size: 12px; }
+.health-summary b { color: var(--ink); font-weight: 600; }
+.health-summary .health-error { color: var(--red); overflow-wrap: anywhere; }
+.log-list { max-height: 320px; overflow: auto; border: 1px solid var(--line); border-radius: 12px; }
+.log-item { padding: 11px 12px; border-bottom: 1px solid var(--line); }
+.log-item:last-child { border-bottom: 0; }
+.log-item > div { display: flex; justify-content: space-between; gap: 14px; font-size: 12px; }
+.log-item.success b { color: var(--green); }
+.log-item.error b { color: var(--red); }
+.log-item time { color: var(--muted); white-space: nowrap; }
+.log-item p { margin: 5px 0 0; color: var(--muted); font-size: 12px; overflow-wrap: anywhere; }
+.log-empty { padding: 28px 12px; color: var(--muted); text-align: center; font-size: 13px; }
 
 @media (max-width: 1180px) {
   body { min-width: 0; }

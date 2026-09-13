@@ -1,17 +1,22 @@
 from __future__ import annotations
 
 import asyncio
+import csv
+import io
+import json
 from contextlib import asynccontextmanager
-from datetime import timedelta, timezone
+from datetime import datetime, timedelta, timezone
+from pathlib import Path
 from urllib.parse import urlparse
 import httpx
 from fastapi import FastAPI, HTTPException, Query, Response
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import StreamingResponse
 from pydantic import BaseModel, Field
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
-from sqlalchemy import select
+from sqlalchemy import desc, func, select
 
-from .db import CollectLog, SessionLocal, Target, UploaderSnapshot, VideoSnapshot, init_db, now, trend_rows
+from .db import DB_PATH, CollectLog, SessionLocal, Target, UploaderSnapshot, VideoSnapshot, init_db, now, trend_rows
 from .bilibili import BilibiliClient, normalize_image_url, parse_input
 
 client = BilibiliClient()
@@ -29,6 +34,68 @@ def target_dict(t: Target):
             'last_collected_at': t.last_collected_at, 'last_success_at': t.last_success_at,
             'last_error_at': t.last_error_at, 'next_collect_at': t.next_collect_at,
             'last_error': t.last_error}
+
+def parse_export_hours(hours: str) -> int | None:
+    if hours == 'all':
+        return None
+    try:
+        value = int(hours)
+    except ValueError as exc:
+        raise HTTPException(422, 'hours 仅支持 all、24、168 或 720') from exc
+    if value not in {24, 168, 720}:
+        raise HTTPException(422, 'hours 仅支持 all、24、168 或 720')
+    return value
+
+def snapshot_dict(snapshot, target: Target) -> dict:
+    row = {
+        'target_id': target.id,
+        'target_type': target.target_type,
+        'target_key': target.target_key,
+        'title': target.title,
+        'active': target.active,
+        'captured_at': snapshot.captured_at.isoformat(),
+    }
+    fields = ('view_count', 'like_count', 'coin_count', 'favorite_count', 'reply_count', 'danmaku_count', 'online_count',
+              'follower_count', 'following_count', 'video_count')
+    for field in fields:
+        row[field] = getattr(snapshot, field, None)
+    return row
+
+def export_payload(targets: list[Target], session, hours: int | None) -> list[dict]:
+    cutoff = now() - timedelta(hours=hours) if hours else None
+    rows: list[dict] = []
+    for target in targets:
+        model = VideoSnapshot if target.target_type == 'video' else UploaderSnapshot
+        statement = select(model).where(model.target_id == target.id).order_by(model.captured_at)
+        if cutoff:
+            statement = statement.where(model.captured_at >= cutoff)
+        rows.extend(snapshot_dict(snapshot, target) for snapshot in session.scalars(statement))
+    return rows
+
+def export_response(targets: list[Target], session, export_format: str, hours: int | None, filename: str):
+    if export_format not in {'csv', 'json'}:
+        raise HTTPException(422, 'format 仅支持 csv 或 json')
+    rows = export_payload(targets, session, hours)
+    if export_format == 'json':
+        body = json.dumps({
+            'exported_at': now().isoformat(),
+            'hours': hours or 'all',
+            'targets': [target_dict(target) for target in targets],
+            'snapshots': rows,
+        }, ensure_ascii=False, indent=2, default=lambda value: value.isoformat() if isinstance(value, datetime) else str(value))
+        return StreamingResponse(io.BytesIO(body.encode('utf-8')), media_type='application/json', headers={
+            'Content-Disposition': f'attachment; filename="{filename}.json"',
+        })
+    fields = ('target_id', 'target_type', 'target_key', 'title', 'active', 'captured_at', 'view_count', 'like_count',
+              'coin_count', 'favorite_count', 'reply_count', 'danmaku_count', 'online_count', 'follower_count',
+              'following_count', 'video_count')
+    output = io.StringIO(newline='')
+    writer = csv.DictWriter(output, fieldnames=fields, extrasaction='ignore')
+    writer.writeheader()
+    writer.writerows(rows)
+    return StreamingResponse(io.BytesIO(('\ufeff' + output.getvalue()).encode('utf-8')), media_type='text/csv', headers={
+        'Content-Disposition': f'attachment; filename="{filename}.csv"',
+    })
 
 async def collect_target(target_id: int, force: bool = False):
     lock = collect_locks.setdefault(target_id, asyncio.Lock())
@@ -81,6 +148,50 @@ app.add_middleware(CORSMiddleware, allow_origins=['http://localhost:5173','http:
 
 @app.get('/api/health')
 def health(): return {'status': 'ok', 'database': 'sqlite', 'collector': scheduler.running}
+
+@app.get('/api/system/summary')
+def system_summary():
+    db_files = (DB_PATH, Path(f'{DB_PATH}-wal'), Path(f'{DB_PATH}-shm'))
+    database_bytes = sum(path.stat().st_size for path in db_files if path.exists())
+    with SessionLocal() as db:
+        return {
+            'database_bytes': database_bytes,
+            'active_target_count': db.scalar(select(func.count()).select_from(Target).where(Target.active)) or 0,
+            'history_target_count': db.scalar(select(func.count()).select_from(Target).where(~Target.active)) or 0,
+            'video_snapshot_count': db.scalar(select(func.count()).select_from(VideoSnapshot)) or 0,
+            'uploader_snapshot_count': db.scalar(select(func.count()).select_from(UploaderSnapshot)) or 0,
+            'failed_target_count': db.scalar(select(func.count()).select_from(Target).where(Target.last_error != '')) or 0,
+        }
+
+@app.get('/api/targets/{target_id}/logs')
+def target_logs(target_id: int, limit: int = Query(default=20, ge=1, le=100)):
+    with SessionLocal() as db:
+        if not db.get(Target, target_id):
+            raise HTTPException(404, '监控对象不存在')
+        logs = db.scalars(select(CollectLog).where(CollectLog.target_id == target_id)
+                          .order_by(desc(CollectLog.captured_at)).limit(limit))
+        return [{
+            'id': log.id,
+            'captured_at': log.captured_at,
+            'status': log.status,
+            'message': log.message,
+        } for log in logs]
+
+@app.get('/api/exports/targets/{target_id}')
+def export_target(target_id: int, format: str = 'csv', hours: str = 'all'):
+    range_hours = parse_export_hours(hours)
+    with SessionLocal() as db:
+        target = db.get(Target, target_id)
+        if not target:
+            raise HTTPException(404, '监控对象不存在')
+        return export_response([target], db, format, range_hours, f'bilibili-monitor-target-{target_id}')
+
+@app.get('/api/exports')
+def export_all(format: str = 'csv', hours: str = 'all'):
+    range_hours = parse_export_hours(hours)
+    with SessionLocal() as db:
+        targets = list(db.scalars(select(Target).order_by(Target.id)))
+        return export_response(targets, db, format, range_hours, 'bilibili-monitor-all-targets')
 
 @app.get('/api/media/image')
 async def media_image(url: str = Query(min_length=1, max_length=2000)):
