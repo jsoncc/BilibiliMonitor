@@ -36,7 +36,6 @@ class Target(Base):
     last_error_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
     next_collect_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
     last_error: Mapped[str] = mapped_column(String(1000), default='')
-    last_submission_at: Mapped[str] = mapped_column(String(40), default='')
 
 class VideoSnapshot(Base):
     __tablename__ = 'video_snapshots'
@@ -76,7 +75,6 @@ def init_db():
         'last_success_at': 'DATETIME',
         'last_error_at': 'DATETIME',
         'next_collect_at': 'DATETIME',
-        'last_submission_at': 'VARCHAR(40)',
     }
     with engine.begin() as connection:
         for name, sql_type in additions.items():

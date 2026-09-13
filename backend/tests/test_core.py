@@ -1,6 +1,7 @@
+import asyncio
 import unittest
 
-from app.bilibili import build_cookie, normalize_image_url, parse_input
+from app.bilibili import BilibiliClient, normalize_image_url, parse_input
 
 
 class InputParsingTests(unittest.TestCase):
@@ -20,12 +21,21 @@ class InputParsingTests(unittest.TestCase):
         self.assertEqual(normalize_image_url('http://i1.hdslb.com/foo.jpg'), 'https://i1.hdslb.com/foo.jpg')
         self.assertEqual(normalize_image_url(''), '')
 
-    def test_cookie_parts_are_merged_without_duplicates(self):
-        cookie = build_cookie('SESSDATA=base', {'SESSDATA': 'ignored', 'bili_jct': 'csrf', 'DedeUserID': '123'})
-        self.assertEqual(cookie, 'SESSDATA=base; bili_jct=csrf; DedeUserID=123')
+    def test_uploader_collection_does_not_include_wbi(self):
+        client = BilibiliClient()
+        calls: list[str] = []
 
-    def test_raw_sessdata_is_supported(self):
-        self.assertEqual(build_cookie('raw-sessdata', {'bili_jct': 'csrf'}), 'SESSDATA=raw-sessdata; bili_jct=csrf')
+        async def fake_get(path, _params):
+            calls.append(path)
+            if path == '/x/relation/stat':
+                return {'follower': 10, 'following': 2}
+            return {'card': {'archive_count': 3}}
+
+        client.get = fake_get  # type: ignore[method-assign]
+        self.assertEqual(asyncio.run(client.uploader_stats('1')), {
+            'follower_count': 10, 'following_count': 2, 'video_count': 3,
+        })
+        self.assertEqual(calls, ['/x/relation/stat', '/x/web-interface/card'])
 
 
 if __name__ == '__main__': unittest.main()

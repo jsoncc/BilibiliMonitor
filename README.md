@@ -35,4 +35,4 @@ npm run dev
 
 启动后访问 http://localhost:5173 。
 
-公开接口可能受哔哩哔哩风控影响；如需登录态，在项目根目录 `.env` 中填写 `BILIBILI_COOKIE`，不要提交该文件。
+公开接口可能受哔哩哔哩风控影响。项目当前监控 UP 主的粉丝、投稿数和关注数；如需为其他受限公开接口配置本地完整 Cookie，请填写根目录 `.env` 的 `BILIBILI_COOKIE`，不要提交或分享该文件。详见 [故障排查](docs/troubleshooting.md)。

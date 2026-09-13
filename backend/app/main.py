@@ -28,7 +28,7 @@ def target_dict(t: Target):
             'interval_seconds': t.interval_seconds, 'active': t.active,
             'last_collected_at': t.last_collected_at, 'last_success_at': t.last_success_at,
             'last_error_at': t.last_error_at, 'next_collect_at': t.next_collect_at,
-            'last_error': t.last_error, 'last_submission_at': t.last_submission_at}
+            'last_error': t.last_error}
 
 async def collect_target(target_id: int, force: bool = False):
     lock = collect_locks.setdefault(target_id, asyncio.Lock())
@@ -48,9 +48,6 @@ async def collect_target(target_id: int, force: bool = False):
                     target = db.get(Target, target_id)
                     if target.target_type == 'video': db.add(VideoSnapshot(target_id=target.id, **stats))
                     else:
-                        last_submission_at = stats.pop('last_submission_at', '')
-                        if last_submission_at:
-                            target.last_submission_at = last_submission_at
                         db.add(UploaderSnapshot(target_id=target.id, **stats))
                     captured = now(); target.last_collected_at = captured; target.last_success_at = captured
                     target.last_error = ''; target.next_collect_at = captured + timedelta(seconds=target.interval_seconds)
