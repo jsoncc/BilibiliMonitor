@@ -1,6 +1,6 @@
 import unittest
 
-from app.bilibili import normalize_image_url, parse_input
+from app.bilibili import build_cookie, normalize_image_url, parse_input
 
 
 class InputParsingTests(unittest.TestCase):
@@ -19,6 +19,13 @@ class InputParsingTests(unittest.TestCase):
         self.assertEqual(normalize_image_url('//i0.hdslb.com/foo.jpg'), 'https://i0.hdslb.com/foo.jpg')
         self.assertEqual(normalize_image_url('http://i1.hdslb.com/foo.jpg'), 'https://i1.hdslb.com/foo.jpg')
         self.assertEqual(normalize_image_url(''), '')
+
+    def test_cookie_parts_are_merged_without_duplicates(self):
+        cookie = build_cookie('SESSDATA=base', {'SESSDATA': 'ignored', 'bili_jct': 'csrf', 'DedeUserID': '123'})
+        self.assertEqual(cookie, 'SESSDATA=base; bili_jct=csrf; DedeUserID=123')
+
+    def test_raw_sessdata_is_supported(self):
+        self.assertEqual(build_cookie('raw-sessdata', {'bili_jct': 'csrf'}), 'SESSDATA=raw-sessdata; bili_jct=csrf')
 
 
 if __name__ == '__main__': unittest.main()

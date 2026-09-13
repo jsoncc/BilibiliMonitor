@@ -14,7 +14,7 @@
 BILIBILI_COOKIE=你的B站Cookie
 ```
 
-也可以分项配置：
+也可以分项配置；即使同时填写了 `BILIBILI_COOKIE`，程序也会自动补充缺少的分项：
 
 ```env
 SESSDATA=你的SESSDATA

@@ -23,6 +23,20 @@ def normalize_image_url(value: str | None) -> str:
         return 'https://' + value[7:]
     return value
 
+def build_cookie(base: str = '', parts: dict[str, str] | None = None) -> str:
+    """Merge a complete Cookie header with supported individual cookie values."""
+    cookie = base.strip()
+    if cookie and '=' not in cookie:
+        cookie = f'SESSDATA={cookie}'
+    entries = [item.strip() for item in cookie.split(';') if item.strip()]
+    names = {item.split('=', 1)[0].strip() for item in entries if '=' in item}
+    for name in ('SESSDATA', 'bili_jct', 'DedeUserID'):
+        value = (parts or {}).get(name, '').strip()
+        if value and name not in names:
+            entries.append(f'{name}={value}')
+            names.add(name)
+    return '; '.join(entries)
+
 @dataclass
 class Resolved:
     target_type: str
@@ -47,16 +61,11 @@ def parse_input(value: str) -> tuple[str, str]:
 
 class BilibiliClient:
     def __init__(self):
-        cookie = os.getenv('BILIBILI_COOKIE', '').strip()
-        if cookie and '=' not in cookie:
-            cookie = f'SESSDATA={cookie}'
-        if not cookie:
-            parts = [
-                f'SESSDATA={os.getenv("SESSDATA", "").strip()}',
-                f'bili_jct={os.getenv("bili_jct", "").strip()}',
-                f'DedeUserID={os.getenv("DedeUserID", "").strip()}',
-            ]
-            cookie = '; '.join(part for part in parts if not part.endswith('='))
+        cookie = build_cookie(os.getenv('BILIBILI_COOKIE', ''), {
+            'SESSDATA': os.getenv('SESSDATA', ''),
+            'bili_jct': os.getenv('bili_jct', ''),
+            'DedeUserID': os.getenv('DedeUserID', ''),
+        })
         self.headers = {'User-Agent': UA, 'Referer': 'https://www.bilibili.com/'}
         if cookie: self.headers['Cookie'] = cookie
 
