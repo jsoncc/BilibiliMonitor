@@ -199,6 +199,7 @@ button { cursor: pointer; }
 
 .modal-backdrop { position: fixed; inset: 0; z-index: 10; display: grid; place-items: center; padding: 24px; background: rgba(24,38,59,.38); backdrop-filter: blur(4px); }
 .preview-modal, .settings-modal { width: min(560px, 100%); padding: 24px; background: #fff; border: 1px solid rgba(255,255,255,.7); border-radius: 22px; box-shadow: 0 30px 90px rgba(16,34,60,.22); }
+.settings-modal p::after { content: '推荐间隔 300 秒（5 分钟），过高频率可能触发平台限制。'; display: block; margin-top: 6px; color: #6d83a1; }
 .preview-top { display: flex; align-items: center; justify-content: space-between; margin-bottom: 22px; }
 .preview-top h3 { margin: 0; font-size: 18px; }
 .modal-close { border: 0; color: var(--muted); background: transparent; font-size: 22px; }
