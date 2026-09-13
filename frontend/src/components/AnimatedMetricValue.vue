@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { onBeforeUnmount, ref, watch } from 'vue'
-const props=defineProps<{value:number|null|undefined}>()
+const props=withDefaults(defineProps<{value:number|null|undefined;prefix?:string;suffix?:string}>(),{prefix:'',suffix:''})
 const displayed=ref(Number(props.value||0))
 const moving=ref(false)
 let frame=0
@@ -15,4 +15,4 @@ watch(()=>props.value,(next,previous)=>{
 })
 onBeforeUnmount(()=>cancelAnimationFrame(frame))
 </script>
-<template><strong class="animated-metric-value" :class="{moving}">{{value==null?'—':format(displayed)}}</strong></template>
+<template><strong class="animated-metric-value" :class="{moving}">{{value==null?'—':`${prefix}${format(displayed)}${suffix}`}}</strong></template>

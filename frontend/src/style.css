@@ -133,23 +133,27 @@ button { cursor: pointer; }
 .focus-empty strong { font-size: 14px; }
 .focus-empty p { margin: 6px 0 0; color: var(--muted); font-size: 12px; }
 .focus-empty > span { color: var(--muted); font-size: 12px; }
-.focus-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(230px, 1fr)); gap: 14px; }
+.focus-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(390px, 1fr)); gap: 16px; }
 .focus-grid.single { grid-template-columns: 1fr; }
 .focus-card { min-width: 0; padding: 18px; overflow: hidden; background: rgba(255,255,255,.96); border: 1px solid var(--line); border-radius: 20px; box-shadow: 0 14px 38px rgba(31,52,84,.06); }
-.focus-card.hero { min-height: 400px; padding: 32px 36px 22px; border-color: #dbe8f7; box-shadow: 0 26px 70px rgba(31,52,84,.10); }
+.focus-card.hero { min-height: 500px; padding: 30px 34px 22px; border-color: #dbe8f7; box-shadow: 0 26px 70px rgba(31,52,84,.10); }
 .focus-card header, .focus-card footer { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
 .focus-label { display: inline-flex; align-items: center; gap: 8px; color: var(--ink); font-size: 14px; font-weight: 750; }
 .focus-label i { width: 8px; height: 8px; border-radius: 50%; background: var(--blue); box-shadow: 0 0 0 5px #eaf3ff; }
 .focus-status { padding: 5px 8px; color: #4c75a5; background: #f0f6ff; border-radius: 99px; font-size: 10px; }
-.focus-card-body { display: flex; align-items: flex-end; justify-content: space-between; gap: 24px; min-height: 124px; padding: 22px 0 18px; }
-.focus-card.hero .focus-card-body { flex: 1; min-height: 276px; padding: 42px 0 34px; }
+.focus-card-body { min-height: 116px; padding: 28px 0 22px; }
+.focus-card.hero .focus-card-body { min-height: 190px; padding: 44px 0 34px; }
 .focus-value { display: block; color: var(--ink); font-size: 38px; line-height: 1; letter-spacing: -1.3px; }
-.focus-card.hero .focus-value { font-size: clamp(64px, 7vw, 104px); letter-spacing: -3px; }
-.focus-context { display: grid; gap: 5px; min-width: 190px; padding: 13px 15px; background: #f5f9ff; border: 1px solid #e4eefb; border-radius: 14px; }
-.focus-context span, .focus-context small { color: var(--muted); font-size: 11px; }
-.focus-context strong { color: var(--green); font-size: 19px; letter-spacing: -.2px; }
-.focus-context strong.negative { color: var(--orange); }
-.focus-context strong.stable { color: var(--muted); }
+.focus-card.hero .focus-value { font-size: clamp(62px, 6.2vw, 96px); letter-spacing: -3px; }
+.focus-windows { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; margin-bottom: 20px; }
+.focus-window { display: grid; min-width: 0; padding: 14px 15px; background: #f6f9fd; border: 1px solid #e7edf5; border-radius: 14px; }
+.focus-window > span { margin-bottom: 9px; color: var(--muted); font-size: 11px; }
+.focus-window > strong { overflow: hidden; color: var(--muted); font-size: 21px; line-height: 1.15; text-overflow: ellipsis; white-space: nowrap; }
+.focus-window > strong.positive { color: var(--green); }
+.focus-window > strong.negative { color: var(--orange); }
+.focus-window > strong.stable { color: #66768a; }
+.focus-window > b { margin-top: 5px; color: #657790; font-size: 12px; font-weight: 650; }
+.focus-window > small { margin-top: 8px; color: #9aa8ba; font-size: 10px; }
 .focus-card footer { padding-top: 14px; border-top: 1px solid #edf1f6; }
 .focus-update { color: var(--muted); font-size: 11px; }
 .focus-update i { display: inline-block; width: 6px; height: 6px; margin-right: 6px; border-radius: 50%; background: var(--green); }
@@ -248,9 +252,12 @@ button { cursor: pointer; }
   .detail-head, .control-bar { flex-direction: column; align-items: stretch; }
   .focus-empty { align-items: flex-start; flex-direction: column; }
   .focus-options { grid-template-columns: 1fr; }
-  .focus-card-body { align-items: flex-start; flex-direction: column; }
   .focus-card.hero .focus-value { font-size: 42px; }
   .focus-workspace { padding: 28px 20px !important; }
+  .focus-grid { grid-template-columns: 1fr; }
+  .focus-windows { grid-template-columns: 1fr; }
+  .focus-card.hero { min-height: 0; padding: 24px 20px 18px; }
+  .focus-card footer { align-items: flex-start; flex-direction: column; }
   .identity-actions { justify-content: space-between; }
   .search-types { display: none; }
 }
