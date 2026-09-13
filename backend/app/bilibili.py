@@ -48,6 +48,15 @@ def parse_input(value: str) -> tuple[str, str]:
 class BilibiliClient:
     def __init__(self):
         cookie = os.getenv('BILIBILI_COOKIE', '').strip()
+        if cookie and '=' not in cookie:
+            cookie = f'SESSDATA={cookie}'
+        if not cookie:
+            parts = [
+                f'SESSDATA={os.getenv("SESSDATA", "").strip()}',
+                f'bili_jct={os.getenv("bili_jct", "").strip()}',
+                f'DedeUserID={os.getenv("DedeUserID", "").strip()}',
+            ]
+            cookie = '; '.join(part for part in parts if not part.endswith('='))
         self.headers = {'User-Agent': UA, 'Referer': 'https://www.bilibili.com/'}
         if cookie: self.headers['Cookie'] = cookie
 

@@ -14,6 +14,16 @@
 BILIBILI_COOKIE=你的B站Cookie
 ```
 
+也可以分项配置：
+
+```env
+SESSDATA=你的SESSDATA
+bili_jct=你的bili_jct
+DedeUserID=你的DedeUserID
+```
+
+程序会自动合并这三项。多个 `.env` 文件中只有项目根目录的 `.env` 会被后端读取。
+
 `.env.example` 只是模板，不要直接填写；请复制为项目根目录的 `.env`。后端启动时会自动加载该文件。
 
 Cookie 只保存在本地，不要提交到 Git。配置后重启后端并对 UP 主执行一次“立即采集”。粉丝数、投稿数和关注数采集不依赖该字段，投稿接口失败不会覆盖已有的上次投稿时间。
