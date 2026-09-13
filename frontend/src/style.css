@@ -46,9 +46,9 @@ body[data-theme='dark'] {
 }
 
 * { box-sizing: border-box; }
-body { margin: 0; min-width: 1080px; overflow-x: hidden; color: var(--text-primary); background: var(--page-bg); transition: background-color .2s ease, color .2s ease; }
-.theme-toggle { position: fixed; z-index: 20; top: 17px; right: 92px; color: var(--text-secondary); background: var(--surface-muted); border: 1px solid var(--border); font-size: 18px; line-height: 1; }
-body:has(.focus-active) .theme-toggle { right: 252px; }
+body { position: relative; margin: 0; min-width: 1080px; overflow-x: hidden; color: var(--text-primary); background: var(--page-bg); transition: background-color .2s ease, color .2s ease; }
+.theme-toggle { position: absolute; z-index: 20; top: 17px; right: 92px; color: var(--text-secondary); background: var(--surface-muted); border: 1px solid var(--border); font-size: 18px; line-height: 1; }
+body:has(.focus-active) .theme-toggle { position: fixed; right: 252px; }
 .theme-toggle:hover { color: var(--accent); background: var(--accent-soft); }
 button, input { font: inherit; }
 button { cursor: pointer; }
