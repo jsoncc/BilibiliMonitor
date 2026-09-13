@@ -5,7 +5,7 @@ from datetime import datetime, timezone
 
 from app.bilibili import BilibiliClient, normalize_image_url, parse_input
 from app.db import Target, VideoSnapshot
-from app.main import export_response, parse_export_hours, snapshot_dict
+from app.main import FOCUS_METRICS, focus_metrics, validate_focus_metrics, export_response, parse_export_hours, snapshot_dict
 
 
 class InputParsingTests(unittest.TestCase):
@@ -72,6 +72,17 @@ class InputParsingTests(unittest.TestCase):
         self.assertEqual(data['hours'], 24)
         self.assertEqual(data['snapshots'], [])
         self.assertEqual(data['targets'][0]['last_success_at'], '2026-09-13T00:00:00+00:00')
+
+    def test_focus_metric_configuration_shape(self):
+        target = Target(target_type='video', target_key='BV1test', focus_metrics='["view_count", "three_combo_count"]')
+        self.assertEqual(focus_metrics(target.focus_metrics), ['view_count', 'three_combo_count'])
+        self.assertEqual(focus_metrics('not-json'), [])
+        self.assertIn('three_combo_count', FOCUS_METRICS['video'])
+        self.assertNotIn('follower_count', FOCUS_METRICS['video'])
+        self.assertIn('follower_count', FOCUS_METRICS['uploader'])
+        validate_focus_metrics('video', ['view_count', 'three_combo_count'])
+        with self.assertRaises(Exception): validate_focus_metrics('video', ['follower_count'])
+        with self.assertRaises(Exception): validate_focus_metrics('uploader', ['follower_count', 'follower_count'])
 
 
 if __name__ == '__main__': unittest.main()

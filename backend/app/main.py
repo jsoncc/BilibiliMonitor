@@ -26,6 +26,25 @@ collect_locks: dict[int, asyncio.Lock] = {}
 class ResolveRequest(BaseModel): value: str = Field(min_length=1)
 class TargetRequest(BaseModel): target_type: str; target_key: str; interval_seconds: int = Field(default=60, ge=60)
 class SettingsRequest(BaseModel): interval_seconds: int = Field(ge=60)
+class FocusRequest(BaseModel): metrics: list[str] = Field(min_length=1)
+
+FOCUS_METRICS = {
+    'video': {'view_count', 'like_count', 'coin_count', 'favorite_count', 'reply_count', 'danmaku_count', 'online_count', 'three_combo_count'},
+    'uploader': {'follower_count', 'video_count', 'following_count'},
+}
+
+def focus_metrics(value: str) -> list[str]:
+    try:
+        parsed = json.loads(value or '[]')
+    except json.JSONDecodeError:
+        return []
+    return parsed if isinstance(parsed, list) and all(isinstance(item, str) for item in parsed) else []
+
+def validate_focus_metrics(target_type: str, metrics: list[str]) -> None:
+    allowed = FOCUS_METRICS.get(target_type, set())
+    invalid = [metric for metric in metrics if metric not in allowed]
+    if invalid: raise HTTPException(422, f'当前对象不支持专注指标：{", ".join(invalid)}')
+    if len(set(metrics)) != len(metrics): raise HTTPException(422, '专注指标不能重复')
 
 def target_dict(t: Target):
     return {'id': t.id, 'target_type': t.target_type, 'target_key': t.target_key, 'title': t.title,
@@ -33,7 +52,7 @@ def target_dict(t: Target):
             'interval_seconds': t.interval_seconds, 'active': t.active,
             'last_collected_at': t.last_collected_at, 'last_success_at': t.last_success_at,
             'last_error_at': t.last_error_at, 'next_collect_at': t.next_collect_at,
-            'last_error': t.last_error}
+            'last_error': t.last_error, 'focus_metrics': focus_metrics(t.focus_metrics)}
 
 def parse_export_hours(hours: str) -> int | None:
     if hours == 'all':
@@ -271,6 +290,16 @@ def settings(target_id: int, req: SettingsRequest):
         target = db.get(Target, target_id)
         if not target: raise HTTPException(404, '监控对象不存在')
         target.interval_seconds = req.interval_seconds; db.commit(); db.refresh(target); return target_dict(target)
+
+@app.patch('/api/targets/{target_id}/focus')
+def save_focus_metrics(target_id: int, req: FocusRequest):
+    with SessionLocal() as db:
+        target = db.get(Target, target_id)
+        if not target: raise HTTPException(404, '监控对象不存在')
+        validate_focus_metrics(target.target_type, req.metrics)
+        target.focus_metrics = json.dumps(req.metrics, ensure_ascii=False)
+        db.commit(); db.refresh(target)
+        return target_dict(target)
 
 @app.post('/api/targets/{target_id}/collect')
 async def collect_now(target_id: int):

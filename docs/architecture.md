@@ -2,7 +2,9 @@
 
 前端 Vue 3 负责展示和每分钟刷新；FastAPI 负责解析输入、调用数据源、保存快照和提供趋势 API；APScheduler 在后端进程内执行自动采集；SQLite 保存项目目录 `data/` 下的历史数据。
 
-前端按职责拆分为 `SearchBar`、`MonitorSidebar`、`MetricGrid` 和 `TrendPanel`，`App.vue` 负责页面状态编排。状态流转为：空白 → 搜索中 → 预览 → 仅查看/监控/历史；搜索错误和采集错误均在页面内反馈。
+前端按职责拆分为 `SearchBar`、`MonitorSidebar`、`MetricGrid`、`FocusMetricPanel` 和 `TrendPanel`，`App.vue` 负责页面状态编排。状态流转为：空白 → 搜索中 → 预览 → 仅查看/监控/历史；搜索错误和采集错误均在页面内反馈。
+
+对象详情可在全部指标与专注模式间切换。专注模式是单对象沉浸视图，前端隐藏搜索、对象导航、采集控制和趋势区；专注配置以 `targets.focus_metrics` JSON 数组按对象保存，通过 `/api/targets/{id}/focus` 更新；三连总量在前端由点赞、投币、收藏实时合计，不改变采集、快照或趋势数据流。
 
 趋势区由时间范围、指标和图表模式共同控制：范围对应 24/168/720 小时，指标一次只绘制一个，增长模式以窗口首点为基准，总量模式显示平台返回值。
 

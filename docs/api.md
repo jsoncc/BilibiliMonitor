@@ -13,6 +13,7 @@
 - `DELETE /api/targets/{id}`：停止监控但保留历史快照。
 - `POST /api/targets/{id}/collect`：立即采集一次。
 - `PATCH /api/targets/{id}/settings`：修改采集间隔。
+- `PATCH /api/targets/{id}/focus`：保存对象专注模式指标，正文为 `{"metrics":["view_count","three_combo_count"]}`；视频支持播放、互动、在线及三连总量，UP 主支持粉丝、投稿、关注。
 - `GET /api/videos/{id}/trend?hours=24|168|720`：查询视频趋势，默认 168 小时，最多 720 小时；前端按单指标展示。
 - `GET /api/uploaders/{id}/trend?hours=24|168|720`：查询 UP 主趋势，默认 168 小时，最多 720 小时；前端按单指标展示。
 - `GET /api/media/image?url=...`：受限代理 B 站图片，统一使用 HTTPS、B 站图片域名白名单、10 秒超时和 8MB 大小限制；不允许代理其他域名。
@@ -24,6 +25,6 @@
 前端趋势范围对应 24 小时、7 天和 30 天。响应包含真实采集时间点；无点或只有一个点时由前端显示原因和等待下一次采集提示。
 - `GET /api/health`：检查服务状态。
 
-对象响应包含 `last_success_at`、`last_error_at`、`next_collect_at`、`last_error` 和 `active` 状态字段。UP 主当前与趋势数据包含粉丝、投稿数和关注数。
+对象响应包含 `last_success_at`、`last_error_at`、`next_collect_at`、`last_error`、`active` 和 `focus_metrics` 状态字段。UP 主当前与趋势数据包含粉丝、投稿数和关注数。
 
 CSV 每行包含对象元信息、采集时间和指标；JSON 包含导出时间、范围、对象列表与快照数组。导出只读取本地 SQLite 数据，不会请求外部接口或保存临时导出文件。

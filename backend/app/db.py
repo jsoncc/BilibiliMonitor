@@ -4,7 +4,7 @@ from datetime import datetime, timedelta, timezone
 from pathlib import Path
 from typing import Any
 
-from sqlalchemy import Boolean, DateTime, ForeignKey, Integer, String, create_engine, event, inspect, select, text
+from sqlalchemy import Boolean, DateTime, ForeignKey, Integer, String, Text, create_engine, event, inspect, select, text
 from sqlalchemy.orm import DeclarativeBase, Mapped, Session, mapped_column, sessionmaker
 
 ROOT = Path(__file__).resolve().parents[2]
@@ -45,6 +45,7 @@ class Target(Base):
     last_error_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
     next_collect_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
     last_error: Mapped[str] = mapped_column(String(1000), default='')
+    focus_metrics: Mapped[str] = mapped_column(Text, default='')
 
 class VideoSnapshot(Base):
     __tablename__ = 'video_snapshots'
@@ -84,6 +85,7 @@ def init_db():
         'last_success_at': 'DATETIME',
         'last_error_at': 'DATETIME',
         'next_collect_at': 'DATETIME',
+        'focus_metrics': 'TEXT',
     }
     with engine.begin() as connection:
         for name, sql_type in additions.items():
