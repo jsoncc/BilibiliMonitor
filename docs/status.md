@@ -22,3 +22,4 @@ v0.2 已完成首批数据管理能力：当前对象与全部对象的 CSV/JSON
 - 后端测试通过：`python -m unittest discover -s tests -v`（8 项）。
 - 前端生产构建通过：`pnpm run build`。
 - SQLite 可直接打开既有数据库，无需迁移。
+- 已增加默认浅色与可持久化深色主题，趋势图同步适配主题颜色。
